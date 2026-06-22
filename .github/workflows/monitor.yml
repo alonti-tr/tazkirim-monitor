@@ -5,6 +5,11 @@ on:
     - cron: "0 8 * * *"
       timezone: Asia/Jerusalem
   workflow_dispatch:
+    inputs:
+      force_notify:
+        description: Send notification even if already sent today (for manual testing)
+        type: boolean
+        default: true
 
 jobs:
   monitor:
@@ -44,4 +49,9 @@ jobs:
           NTFY_PRIORITY: "4"
           LOG_LEVEL: INFO
           STATE_DB_PATH: ./data/state.db
-        run: python -m tazkirim_monitor
+        run: |
+          ARGS=""
+          if [ "${{ inputs.force_notify }}" = "true" ]; then
+            ARGS="--force-empty-notify"
+          fi
+          python -m tazkirim_monitor $ARGS

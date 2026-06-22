@@ -28,6 +28,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--date", help="Override reference date (YYYY-MM-DD) for filtering")
     parser.add_argument("--debug-screenshot", help="Save a screenshot after the last search query")
     parser.add_argument("--headed", action="store_true", help="Run browser in headed mode")
+    parser.add_argument(
+        "--force-empty-notify",
+        action="store_true",
+        help="Send empty-day notification even if already sent for this date",
+    )
     return parser.parse_args()
 
 
@@ -73,9 +78,18 @@ def run(settings: Settings, args: argparse.Namespace) -> int:
             notifier.notify_item(result)
             state.mark_notified(result)
 
-        if only_today and not results and not state.was_empty_notified(reference_date):
-            notifier.notify_no_results(reference_date)
-            state.mark_empty_notified(reference_date)
+        if only_today and not results:
+            already_sent = state.was_empty_notified(reference_date)
+            if already_sent and not args.force_empty_notify:
+                logger.info(
+                    "Skipping empty-day notification for %s (already sent today)",
+                    reference_date.isoformat(),
+                )
+            else:
+                if already_sent and args.force_empty_notify:
+                    logger.info("Force-sending empty-day notification for %s", reference_date.isoformat())
+                notifier.notify_no_results(reference_date)
+                state.mark_empty_notified(reference_date)
 
         if settings.send_heartbeat and not new_results and results:
             notifier.notify_heartbeat(len(results), len(new_results))
