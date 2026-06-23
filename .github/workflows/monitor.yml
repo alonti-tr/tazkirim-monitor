@@ -2,8 +2,8 @@ name: Tazkirim Monitor
 
 on:
   schedule:
-    - cron: "0 8 * * *"
-      timezone: Asia/Jerusalem
+    # 05:05 UTC = 08:05 Israel (IDT). Off-the-hour to reduce GitHub queue delays.
+    - cron: "5 5 * * *"
   workflow_dispatch:
     inputs:
       force_notify:
