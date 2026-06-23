@@ -2,7 +2,7 @@ name: Tazkirim Monitor
 
 on:
   schedule:
-    # Every 10 minutes (UTC). Keep stable — frequent cron edits can break registration.
+    # Every 10 minutes (UTC). Do not edit cron frequently.
     - cron: "*/10 * * * *"
       timezone: UTC
   workflow_dispatch:
